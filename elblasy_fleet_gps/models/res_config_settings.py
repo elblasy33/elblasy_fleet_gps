@@ -15,3 +15,5 @@ class ResConfigSettings(models.TransientModel):
                                help="Days in the reports start at midnight of this timezone (e.g. Africa/Cairo).")
     gps_geocoding = fields.Boolean("Street addresses (OpenStreetMap)", config_parameter='elblasy_fleet_gps.geocoding',
                                    help="Show the street address of a vehicle. Sends its coordinates to the public Nominatim service.")
+    gps_icon_size = fields.Integer("Vehicle icon size (%)", config_parameter='elblasy_fleet_gps.icon_size', default=140,
+                                   help="Size of the vehicles on the live map and the playback, in percent (50-250).")

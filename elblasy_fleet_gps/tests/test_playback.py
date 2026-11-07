@@ -37,6 +37,7 @@ class TestRoute(Common):
         self.assertEqual(r['device']['category'], 'container')
         self.assertEqual(r['window'][0], '2026-10-31 22:00:00')  # Cairo midnight
         self.assertEqual(r['limit'], 80)
+        self.assertEqual(r['icon_size'], 140)
         self.assertEqual(len(r['trips']), 1)
         self.assertEqual(len(r['stops']), 1)
         self.assertGreaterEqual(r['stops'][0]['minutes'], 3)

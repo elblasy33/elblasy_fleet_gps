@@ -51,3 +51,18 @@ export function collapseAttribution(map) {
     map.once("load", () => setTimeout(fold, 0));
     map.once("idle", fold);
 }
+
+/**
+ * Vehicle icons follow the ground size when zoomed in and stop shrinking at a readable minimum (the top-view truck is drawn
+ * 66 px long for a ~16 m vehicle). `percent` is the user-chosen size (setting, 140 by default) on top of that.
+ */
+export function applyIconScale(map, root, percent = 140) {
+    if (!map || !root) {
+        return;
+    }
+    const k = Math.min(2.5, Math.max(0.5, percent / 100));
+    const mpp = (156543.03 * Math.cos((map.getCenter().lat * Math.PI) / 180)) / Math.pow(2, map.getZoom()); // metres per pixel
+    const real = 16 / mpp / 66;
+    root.style.setProperty("--gps-s", (Math.min(1.6, Math.max(0.4, real)) * k).toFixed(3));
+    root.style.setProperty("--gps-sb", (Math.min(1.2, Math.max(0.65, real)) * k).toFixed(3));
+}

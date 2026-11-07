@@ -23,6 +23,7 @@ def _date(value):
         return False
 
 BUS_TYPE = 'elblasy_fleet_gps/live'
+ICON_DEFAULT, ICON_MIN, ICON_MAX = 140, 50, 250  # percent: the Tracar dashboard drew its icons at 1.4x
 SUBSCRIPTION_WARN_DAYS = 14
 LIVE_FRESH = timedelta(minutes=5)
 STAY_RADIUS_M = 150          # moving about inside a circle 300 m across is still the same place
@@ -257,6 +258,12 @@ class GpsDevice(models.Model):
         }
 
     @api.model
+    def _icon_size(self):
+        """Vehicle icon size in percent (setting), kept within a sane range."""
+        value = self.env['ir.config_parameter'].sudo().get_int('elblasy_fleet_gps.icon_size') or ICON_DEFAULT
+        return max(ICON_MIN, min(ICON_MAX, value))
+
+    @api.model
     def get_live_data(self, since=None):
         """Everything the live map needs. With ``since`` (the ``now`` of a previous answer) only the devices written
         since are returned, so a refresh costs a few rows instead of the whole fleet."""
@@ -274,6 +281,7 @@ class GpsDevice(models.Model):
             'config': {
                 'push_active': self.env['fleet.gps.server']._push_active(),
                 'speed_limit': params.get_int('elblasy_fleet_gps.speed_limit') or 80,
+                'icon_size': self._icon_size(),
                 'colors': {
                     'moving': params.get_str('elblasy_fleet_gps.color_moving') or '#23e76a',
                     'idle': params.get_str('elblasy_fleet_gps.color_idle') or '#f59e0b',

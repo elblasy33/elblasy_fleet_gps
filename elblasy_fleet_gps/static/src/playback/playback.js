@@ -7,7 +7,7 @@ import { localization } from "@web/core/l10n/localization";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { resolveStyle } from "../map/map_styles";
-import { collapseAttribution, enableArabicShaping, hasWebGL, mapLang, withStyle } from "../map/map_common";
+import { applyIconScale, collapseAttribution, enableArabicShaping, hasWebGL, mapLang, withStyle } from "../map/map_common";
 import { distanceM, lerpAngle, markerHtml, vehicleState } from "../map/vehicle";
 
 const { DateTime } = luxon;
@@ -112,6 +112,7 @@ export class FleetGpsPlayback extends Component {
             const data = await this.orm.call("fleet.gps.position", "get_route", [this.state.deviceId], byWindow ? { start: p.start, end: p.end } : { day: this.state.day });
             this.state.error = "";
             this.state.data = data;
+            this.scaleIcons();
             this.pts = data.pts;
             this.buildCumulative();
             this.state.tripIdx = -1;
@@ -346,6 +347,8 @@ export class FleetGpsPlayback extends Component {
         this.map.addControl(new globalThis.maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
         collapseAttribution(this.map);
         this.map.on("error", (e) => console.debug("map:", e?.error?.message || e));
+        this.map.on("zoom", () => this.scaleIcons());
+        this.map.once("load", () => this.scaleIcons());
         this.map.once("load", () => {
             this.drawRoute();
             this.drawStops();
@@ -354,6 +357,10 @@ export class FleetGpsPlayback extends Component {
         });
         this.resize = new ResizeObserver(() => this.map?.resize());
         this.resize.observe(root);
+    }
+
+    scaleIcons() {
+        applyIconScale(this.map, this.rootRef(), this.state.data?.icon_size);
     }
 
     makeMarker() {

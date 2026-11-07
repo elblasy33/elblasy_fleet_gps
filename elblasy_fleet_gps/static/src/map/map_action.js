@@ -6,7 +6,7 @@ import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { fencesToGeoJSON } from "./geofence";
 import { STYLE_LIST, resolveStyle } from "./map_styles";
-import { collapseAttribution, enableArabicShaping, hasWebGL, mapLang, withStyle } from "./map_common";
+import { applyIconScale, collapseAttribution, enableArabicShaping, hasWebGL, mapLang, withStyle } from "./map_common";
 import { STATES, distanceM, ease, glideMs, hasPosition, lerpAngle, markerHtml, timeAgo, utcMs, vehicleState } from "./vehicle";
 
 const BUS_TYPE = "elblasy_fleet_gps/live";
@@ -48,7 +48,7 @@ export class FleetGpsMap extends Component {
             error: "",
             noGl: false,
             devices: {}, // id -> live record
-            cfg: { speed_limit: 80, colors: { moving: "#23e76a", idle: "#f59e0b", stopped: "#27aef1", over: "#f20202", offline: "#727374" } },
+            cfg: { speed_limit: 80, icon_size: 140, colors: { moving: "#23e76a", idle: "#f59e0b", stopped: "#27aef1", over: "#f20202", offline: "#727374" } },
             search: "",
             filter: "all",
             selected: 0,
@@ -119,6 +119,7 @@ export class FleetGpsMap extends Component {
             const res = await this.orm.call("fleet.gps.device", "get_live_data", [], { since: full ? null : this.cursor });
             this.cursor = res.now;
             this.state.cfg = res.config;
+            this.applyScale(); // the size setting may have changed
             const devices = res.full ? {} : { ...this.state.devices };
             for (const d of res.devices) {
                 devices[d.id] = d;
@@ -205,16 +206,8 @@ export class FleetGpsMap extends Component {
         this.resizeObserver.observe(root);
     }
 
-    /** Icons follow the ground size when zoomed in and stop shrinking at a readable minimum. */
     applyScale() {
-        const m = this.map, root = this.rootRef();
-        if (!m || !root) {
-            return;
-        }
-        const mpp = (156543.03 * Math.cos((m.getCenter().lat * Math.PI) / 180)) / Math.pow(2, m.getZoom());
-        const real = 16 / mpp / 66;
-        root.style.setProperty("--gps-s", Math.min(1.6, Math.max(0.4, real)).toFixed(3));
-        root.style.setProperty("--gps-sb", Math.min(1.2, Math.max(0.65, real)).toFixed(3));
+        applyIconScale(this.map, this.rootRef(), this.state.cfg.icon_size);
     }
 
     markerKey(d, info) {

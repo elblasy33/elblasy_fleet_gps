@@ -52,6 +52,16 @@ class TestLiveData(Common):
         cfg = self.Dev.get_live_data()['config']
         self.assertEqual((cfg['speed_limit'], cfg['colors']['over']), (100, '#000000'))
 
+    def test_icon_size_defaults_to_140_and_is_clamped(self):
+        params = self.env['ir.config_parameter']
+        self.assertEqual(self.Dev.get_live_data()['config']['icon_size'], 140)   # the Tracar dashboard drew icons at 1.4x
+        params.set_int('elblasy_fleet_gps.icon_size', 180)
+        self.assertEqual(self.Dev.get_live_data()['config']['icon_size'], 180)
+        params.set_int('elblasy_fleet_gps.icon_size', 9999)
+        self.assertEqual(self.Dev._icon_size(), 250)
+        params.set_int('elblasy_fleet_gps.icon_size', 5)
+        self.assertEqual(self.Dev._icon_size(), 50)
+
     def test_outsider_has_no_access(self):
         user = self.env['res.users'].with_context(no_reset_password=True).create({'name': 'N', 'login': 'nogps', 'email': 'n@example.com'})
         with self.assertRaises(AccessError):
@@ -324,3 +334,25 @@ class TestStylesCompile(TransactionCase):
             asset = self.env['ir.qweb']._get_asset_bundle(bundle, js=False, css=True, debug_assets=False, rtl=rtl)
             asset.preprocess_css()
             self.assertFalse(asset.css_errors, f"{bundle} (rtl={rtl}): {asset.css_errors[:1]}")
+
+    def test_vehicle_markers_and_map_css_are_not_mirrored_in_rtl(self):
+        """In Arabic, rtlcss mirrored `left` / `margin-left` of the marker geometry and of MapLibre itself, which moved every
+        vehicle off its place (they were drawn outside the visible map). Needs the rtlcss binary, as Odoo itself does."""
+        from odoo.tools.misc import find_in_path
+        if not find_in_path('rtlcss'):
+            self.skipTest("rtlcss is not installed: Odoo does not mirror anything here either")
+        lib = self.env['ir.qweb']._get_asset_bundle('elblasy_fleet_gps.map_lib', js=False, css=True, debug_assets=False, rtl=True)
+        lib.preprocess_css()
+        css = lib.css()[0].raw.decode()
+        self.assertRegex(css, r"\.maplibregl-marker\{[^}]*left:0", "MapLibre markers anchor on the left, in both directions")
+        self.assertNotRegex(css, r"\.maplibregl-marker\{[^}]*right:0")
+        web = self.env['ir.qweb']._get_asset_bundle('web.assets_backend', js=False, css=True, debug_assets=False, rtl=True)
+        web.preprocess_css()
+        css = web.css()[0].raw.decode()
+        badge = css[css.index('.o_gps_veh .o_gps_badge'):][:400]
+        self.assertIn('margin: -1.05rem 0 0 -1.05rem', badge)      # not flipped to "-1.05rem -1.05rem 0 0"
+        label = css[css.index('.o_gps_veh .o_gps_lbl'):][:300]
+        self.assertIn('left: 0', label)
+        self.assertIn('translateX(-50%)', label)
+        # the layout itself IS mirrored: the list panel sits at the inline start (right in Arabic)
+        self.assertIn('margin-right: auto', css) if '.ms-auto' in css else None

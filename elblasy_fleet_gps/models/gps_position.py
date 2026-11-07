@@ -179,6 +179,7 @@ class GpsPosition(models.Model):
             'window': [fields.Datetime.to_string(d_start), fields.Datetime.to_string(d_end)],
             'pts': pts, 'source': source, 'truncated': len(pts) >= MAX_POINTS,
             'limit': self.env['ir.config_parameter'].sudo().get_int('elblasy_fleet_gps.speed_limit') or 80,
+            'icon_size': self.env['fleet.gps.device']._icon_size(),
             'stops': [{'start': fields.Datetime.to_string(s['start_time']), 'end': fields.Datetime.to_string(s['end_time']),
                        'lat': s['latitude'], 'lon': s['longitude'], 'ign': s['ignition'], 'place': s['place'] or '',
                        'minutes': round(s['duration_minutes'])} for s in stops],

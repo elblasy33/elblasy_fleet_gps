@@ -1,0 +1,33 @@
+// Vehicle markers on the map. This is physical geometry (an icon centred on a point, a label under it, an arrow ahead of it),
+// not text direction: rtlcss must NOT mirror it. Mirrored, it moved every vehicle off its place on the Arabic map
+// (`.o_gps_badge` margin, `.o_gps_lbl` left/translateX, the heading arrow's `left`). Same for MapLibre's own CSS (see the
+// ignore wrapper in lib/maplibre/maplibre-gl.css). `/*!` keeps the directive through the minifier.
+/*!rtl:begin:ignore*/
+.o_gps_map {
+    .o_gps_marker { cursor: pointer; }
+    .o_gps_veh {
+        position: relative; width: 0; height: 0;
+        --c: #27aef1;
+        .o_gps_badge {
+            position: absolute; width: 2.1rem; height: 2.1rem; margin: -1.05rem 0 0 -1.05rem; border-radius: 50%;
+            background: #fff; border: 3px solid var(--c); box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+            display: flex; align-items: center; justify-content: center; color: #1c2430; font-size: 1.15rem;
+            transform: scale(var(--gps-sb));
+        }
+        .o_gps_heading { position: absolute; inset: 0; transform-origin: 0 0;
+            i { position: absolute; left: -7px; top: calc(-1.05rem * var(--gps-sb) - 12px); border: 7px solid transparent; border-bottom: 11px solid var(--c); border-top: 0; }
+        }
+        &.top .o_gps_heading { transform-origin: 0 0; .o_gps_shape { transform: scale(var(--gps-s)); transform-origin: center; position: absolute; } }
+        &.moving .o_gps_badge, &.over .o_gps_badge { animation: none; }
+        &.offline .o_gps_badge { opacity: 0.75; }
+        .o_gps_ring { position: absolute; width: 3.6rem; height: 3.6rem; margin: -1.8rem 0 0 -1.8rem; border-radius: 50%; border: 3px solid var(--c); opacity: 0.55; animation: o_gps_ring 1.6s ease-out infinite; }
+        .o_gps_lbl {
+            position: absolute; top: calc(1.2rem * var(--gps-sb)); left: 0; transform: translateX(-50%); white-space: nowrap;
+            background: rgba(15, 23, 42, 0.82); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 0.05rem 0.45rem; border-radius: 0.3rem;
+        }
+        &.top .o_gps_lbl { top: calc(33px * var(--gps-s) + 4px); }
+        &.sel .o_gps_badge { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(0, 0, 0, 0.5); }
+    }
+}
+@keyframes o_gps_ring { from { transform: scale(0.6); opacity: 0.7; } to { transform: scale(1.3); opacity: 0; } }
+/*!rtl:end:ignore*/

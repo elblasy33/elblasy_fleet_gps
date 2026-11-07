@@ -19,6 +19,9 @@
                     <setting string="Raw positions retention" help="Older raw positions are deleted every night.">
                         <div class="content-group mt16"><field name="gps_retention_days" class="text-center" style="width: 6rem;"/> days</div>
                     </setting>
+                    <setting string="Vehicle icon size" help="How big the vehicles are drawn on the live map and the playback. 100% is the base size; icons also grow and shrink with the zoom.">
+                        <div class="content-group mt16"><field name="gps_icon_size" class="text-center" style="width: 6rem;"/> %</div>
+                    </setting>
                     <setting string="Status colours" help="Colours of the vehicles on the live map.">
                         <div class="content-group mt16">
                             <div class="row"><label class="col-4" for="gps_color_moving"/><field name="gps_color_moving" widget="color" class="col-8"/></div>

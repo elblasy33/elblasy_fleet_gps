@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-07 16:07+0000\n"
-"PO-Revision-Date: 2026-11-07 16:07+0000\n"
+"POT-Creation-Date: 2026-11-07 18:42+0000\n"
+"PO-Revision-Date: 2026-11-07 18:42+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: ar\n"
@@ -1185,6 +1185,15 @@ msgid "History Import"
 msgstr "سحب التاريخ"
 
 #. module: elblasy_fleet_gps
+#: model_terms:ir.ui.view,arch_db:elblasy_fleet_gps.res_config_settings_view_form_gps
+msgid ""
+"How big the vehicles are drawn on the live map and the playback. 100% is the"
+" base size; icons also grow and shrink with the zoom."
+msgstr ""
+"حجم رسم المركبات على الخريطة الحية وتشغيل الرحلة. 100٪ هو الحجم الأساسي، "
+"والأيقونات تكبر وتصغر أيضًا مع التقريب."
+
+#. module: elblasy_fleet_gps
 #: model:ir.model.fields,field_description:elblasy_fleet_gps.field_fleet_gps_command__confirm_stop
 msgid "I understand this can stop a moving vehicle"
 msgstr "أدرك أن هذا قد يوقف مركبة متحركة"
@@ -2170,6 +2179,13 @@ msgid ""
 msgstr "عرض عنوان شارع المركبة. يرسل إحداثياتها إلى خدمة Nominatim العامة."
 
 #. module: elblasy_fleet_gps
+#: model:ir.model.fields,help:elblasy_fleet_gps.field_res_config_settings__gps_icon_size
+msgid ""
+"Size of the vehicles on the live map and the playback, in percent (50-250)."
+msgstr ""
+"حجم المركبات على الخريطة الحية وتشغيل الرحلة بالنسبة المئوية (50-250)."
+
+#. module: elblasy_fleet_gps
 #: model:ir.model.fields,field_description:elblasy_fleet_gps.field_fleet_gps_device__last_speed
 #: model:ir.model.fields,field_description:elblasy_fleet_gps.field_fleet_gps_position__speed
 msgid "Speed (km/h)"
@@ -2676,6 +2692,16 @@ msgstr "المركبة"
 #: code:addons/elblasy_fleet_gps/static/src/map/map_action.xml:0
 msgid "Vehicle details"
 msgstr "تفاصيل المركبة"
+
+#. module: elblasy_fleet_gps
+#: model_terms:ir.ui.view,arch_db:elblasy_fleet_gps.res_config_settings_view_form_gps
+msgid "Vehicle icon size"
+msgstr "حجم أيقونة المركبة"
+
+#. module: elblasy_fleet_gps
+#: model:ir.model.fields,field_description:elblasy_fleet_gps.field_res_config_settings__gps_icon_size
+msgid "Vehicle icon size (%)"
+msgstr "حجم أيقونة المركبة (٪)"
 
 #. module: elblasy_fleet_gps
 #. odoo-javascript
