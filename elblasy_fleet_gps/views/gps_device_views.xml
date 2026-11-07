@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gps_device_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.device.list</field>
+        <field name="model">fleet.gps.device</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="status != 'online'" decoration-success="status == 'online'">
+                <field name="name"/>
+                <field name="vehicle_id" widget="many2one" optional="show"/>
+                <field name="driver_id" optional="show"/>
+                <field name="live_state" widget="badge" decoration-success="live_state == 'moving'" decoration-danger="live_state == 'over'"
+                       decoration-warning="live_state == 'idle'" decoration-info="live_state == 'stopped'" decoration-muted="live_state in ('offline', 'nofix')"/>
+                <field name="status" widget="badge" optional="hide" decoration-success="status == 'online'" decoration-muted="status != 'online'"/>
+                <field name="last_speed" optional="show"/>
+                <field name="last_seen_ago" optional="show"/>
+                <field name="last_battery" optional="show"/>
+                <field name="last_update" optional="show"/>
+                <field name="subscription_end" optional="show" decoration-danger="subscription_state == 'expired'" decoration-warning="subscription_state == 'soon'"/>
+                <field name="subscription_state" column_invisible="1"/>
+                <field name="unique_id" optional="hide"/>
+                <field name="phone" optional="hide"/>
+                <field name="group_name" optional="hide"/>
+                <field name="server_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_device_view_form" model="ir.ui.view">
+        <field name="name">fleet.gps.device.form</field>
+        <field name="model">fleet.gps.device</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_playback" type="object" string="Playback" class="btn-primary"/>
+                    <button name="action_open_command" type="object" string="Send command" groups="elblasy_fleet_gps.group_gps_manager"/>
+                    <button name="action_auto_link" type="object" string="Auto-link vehicle"
+                            invisible="vehicle_id"/>
+                    <button name="action_create_vehicle" type="object" string="Create vehicle"
+                            invisible="vehicle_id"/>
+                    <field name="live_state" widget="statusbar" statusbar_visible="moving,idle,stopped,offline"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Vehicle">
+                            <field name="vehicle_id"/>
+                            <field name="driver_id"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Registration">
+                            <field name="server_id"/>
+                            <field name="traccar_id"/>
+                            <field name="unique_id"/>
+                            <field name="phone"/>
+                            <field name="iccid"/>
+                            <field name="model"/>
+                            <field name="group_name"/>
+                            <field name="category"/>
+                            <field name="color" widget="color"/>
+                            <field name="disabled"/>
+                            <field name="subscription_start"/>
+                            <field name="subscription_end"/>
+                            <field name="subscription_state" widget="badge" decoration-danger="subscription_state == 'expired'" decoration-warning="subscription_state == 'soon'" decoration-success="subscription_state == 'ok'" invisible="subscription_state == 'none'"/>
+                        </group>
+                        <group string="Last position">
+                            <field name="last_update"/>
+                            <field name="last_fix_time"/>
+                            <field name="last_latitude"/>
+                            <field name="last_longitude"/>
+                            <field name="last_speed"/>
+                            <field name="last_course"/>
+                            <field name="last_ignition"/>
+                            <field name="last_battery"/>
+                            <field name="last_address"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="gps_device_view_search" model="ir.ui.view">
+        <field name="name">fleet.gps.device.search</field>
+        <field name="model">fleet.gps.device</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('unique_id', 'ilike', self), ('phone', 'ilike', self)]"/>
+                <field name="vehicle_id"/>
+                <filter name="online" string="Online" domain="[('status', '=', 'online')]"/>
+                <filter name="offline" string="Offline" domain="[('status', '!=', 'online')]"/>
+                <filter name="unlinked" string="Not linked to a vehicle" domain="[('vehicle_id', '=', False)]"/>
+                <filter name="sub_expired" string="Subscription expired" domain="[('subscription_end', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="sub_soon" string="Expiring in 14 days" domain="[('subscription_end', '&gt;=', context_today().strftime('%Y-%m-%d')), ('subscription_end', '&lt;=', (context_today() + datetime.timedelta(days=14)).strftime('%Y-%m-%d'))]"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group>
+                    <filter name="g_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="g_group" string="Traccar group" context="{'group_by': 'group_name'}"/>
+                    <filter name="g_server" string="Server" context="{'group_by': 'server_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="gps_device_action" model="ir.actions.act_window">
+        <field name="name">GPS Devices</field>
+        <field name="res_model">fleet.gps.device</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="gps_device_action_link" model="ir.actions.server">
+        <field name="name">Auto-link to vehicles</field>
+        <field name="model_id" ref="model_fleet_gps_device"/>
+        <field name="binding_model_id" ref="model_fleet_gps_device"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">records.action_auto_link()</field>
+    </record>
+    <record id="gps_device_action_create_vehicles" model="ir.actions.server">
+        <field name="name">Create vehicles for selected devices</field>
+        <field name="model_id" ref="model_fleet_gps_device"/>
+        <field name="binding_model_id" ref="model_fleet_gps_device"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">records.action_create_vehicle()</field>
+    </record>
+</odoo>

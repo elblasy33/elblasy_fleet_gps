@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_gps" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.gps</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="fleet.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='fleet']" position="inside">
+                <block title="GPS Tracking" id="gps_setting">
+                    <setting string="Speed limit" help="Vehicles above it are drawn in the over-speed colour.">
+                        <div class="content-group mt16"><field name="gps_speed_limit" class="text-center" style="width: 6rem;"/> km/h</div>
+                    </setting>
+                    <setting string="Street addresses" help="Looks up the street of a vehicle on the live map with OpenStreetMap Nominatim. This sends the vehicle's coordinates to a public service; answers are cached.">
+                        <field name="gps_geocoding"/>
+                    </setting>
+                    <setting string="Reports timezone" help="Days in the reports start at midnight of this timezone, e.g. Africa/Cairo.">
+                        <div class="content-group mt16"><field name="gps_timezone" style="width: 14rem;"/></div>
+                    </setting>
+                    <setting string="Raw positions retention" help="Older raw positions are deleted every night.">
+                        <div class="content-group mt16"><field name="gps_retention_days" class="text-center" style="width: 6rem;"/> days</div>
+                    </setting>
+                    <setting string="Status colours" help="Colours of the vehicles on the live map.">
+                        <div class="content-group mt16">
+                            <div class="row"><label class="col-4" for="gps_color_moving"/><field name="gps_color_moving" widget="color" class="col-8"/></div>
+                            <div class="row"><label class="col-4" for="gps_color_idle"/><field name="gps_color_idle" widget="color" class="col-8"/></div>
+                            <div class="row"><label class="col-4" for="gps_color_stopped"/><field name="gps_color_stopped" widget="color" class="col-8"/></div>
+                            <div class="row"><label class="col-4" for="gps_color_over"/><field name="gps_color_over" widget="color" class="col-8"/></div>
+                            <div class="row"><label class="col-4" for="gps_color_offline"/><field name="gps_color_offline" widget="color" class="col-8"/></div>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

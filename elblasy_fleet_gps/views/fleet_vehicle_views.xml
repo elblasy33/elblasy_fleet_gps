@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fleet_vehicle_view_form_gps" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.gps</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_gps_device" type="object" class="oe_stat_button" icon="location_on"
+                        invisible="not gps_device_id" groups="elblasy_fleet_gps.group_gps_user">
+                    <field name="gps_status" widget="statinfo" string="GPS"/>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="GPS" name="page_gps" groups="elblasy_fleet_gps.group_gps_user">
+                    <field name="gps_device_ids" context="{'default_vehicle_id': id}">
+                        <list>
+                            <field name="name"/>
+                            <field name="status" widget="badge"/>
+                            <field name="last_speed"/>
+                            <field name="last_battery"/>
+                            <field name="last_update"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

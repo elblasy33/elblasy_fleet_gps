@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gps_command_view_form" model="ir.ui.view">
+        <field name="name">fleet.gps.command.form</field>
+        <field name="model">fleet.gps.command</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="device_id"/>
+                    <field name="command_type"/>
+                    <field name="data" invisible="command_type != 'custom'" required="command_type == 'custom'"/>
+                    <field name="frequency" invisible="command_type != 'positionPeriodic'"/>
+                    <field name="dangerous" invisible="1"/>
+                    <field name="confirm_stop" invisible="not dangerous"/>
+                </group>
+                <div class="alert alert-warning" role="alert" invisible="not dangerous">
+                    Stopping an engine while the vehicle is moving is dangerous. Make sure it is parked or that this is an emergency.
+                </div>
+                <footer>
+                    <button name="action_send" type="object" string="Send" class="btn-primary" data-hotkey="q"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <record id="gps_command_action" model="ir.actions.act_window">
+        <field name="name">Send command</field>
+        <field name="res_model">fleet.gps.command</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="cron_gps_poll" model="ir.cron">
+        <field name="name">Fleet GPS: poll Traccar (safety net)</field>
+        <field name="model_id" ref="model_fleet_gps_server"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_poll()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_gps_purge" model="ir.cron">
+        <field name="name">Fleet GPS: purge old positions</field>
+        <field name="model_id" ref="model_fleet_gps_position"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_purge()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="cron_gps_compute" model="ir.cron">
+        <field name="name">Fleet GPS: compute trips and daily summaries</field>
+        <field name="model_id" ref="model_fleet_gps_daily"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_compute()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_gps_backfill" model="ir.cron">
+        <field name="name">Fleet GPS: import history from Traccar</field>
+        <field name="model_id" ref="model_fleet_gps_backfill"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_step()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+    </record>
+    <record id="cron_gps_subscription" model="ir.cron">
+        <field name="name">Fleet GPS: subscription expiry alerts</field>
+        <field name="model_id" ref="model_fleet_gps_device"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_subscription_alerts()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

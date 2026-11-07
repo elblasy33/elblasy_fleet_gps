@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gps_server_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.server.list</field>
+        <field name="model">fleet.gps.server</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="base_url"/>
+                <field name="device_count"/>
+                <field name="last_push_date"/>
+                <field name="last_test_result"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_server_view_form" model="ir.ui.view">
+        <field name="name">fleet.gps.server.form</field>
+        <field name="model">fleet.gps.server</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection" class="btn-primary"/>
+                    <button name="action_import_devices" type="object" string="Import Devices"
+                            confirm="Import / refresh all devices from Traccar?"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_devices" type="object" class="oe_stat_button" icon="directions_car">
+                            <field name="device_count" widget="statinfo" string="Devices"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="name"/>
+                            <field name="base_url" placeholder="https://traccar.example.com"/>
+                            <field name="api_token" password="True"/>
+                            <field name="user"/>
+                            <field name="password" password="True"/>
+                            <field name="verify_ssl"/>
+                            <field name="timeout"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Live data">
+                            <field name="push_url" widget="CopyClipboardChar"/>
+                            <field name="event_push_url" widget="CopyClipboardChar"/>
+                            <button name="action_regenerate_push_token" type="object" string="Regenerate token"
+                                    class="btn-link" confirm="The current Traccar forward.url will stop working. Continue?"/>
+                            <field name="use_polling"/>
+                            <field name="last_push_date"/>
+                            <field name="last_poll_date"/>
+                            <field name="last_test_date"/>
+                            <field name="last_test_result"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        In <code>traccar.xml</code> set: <code>forward.enable=true</code>, <code>forward.json=true</code>
+                        and <code>forward.url=</code> the Push URL above. For events add <code>event.forward.enable=true</code>,
+                        <code>event.forward.json=true</code> and <code>event.forward.url=</code> the Event Push URL. Restart Traccar.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="gps_server_action" model="ir.actions.act_window">
+        <field name="name">Traccar Servers</field>
+        <field name="res_model">fleet.gps.server</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

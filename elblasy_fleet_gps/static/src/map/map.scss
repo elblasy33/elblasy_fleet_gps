@@ -1,0 +1,190 @@
+// Live fleet map. Colours are variables so the dark bundle (map.dark.scss) only swaps them. Logical properties keep RTL right.
+.o_gps_map {
+    --gps-panel: #ffffff;
+    --gps-head: #f4f5f7;
+    --gps-border: #e3e6ea;
+    --gps-hover: #f4f5f7;
+    --gps-active: #e8f0fe;
+    --gps-text: #1c2430;
+    --gps-muted: #6b7686;
+    --gps-input: #f1f3f5;
+    --gps-shadow: 0 2px 10px rgba(16, 24, 40, 0.18);
+    --gps-s: 1;
+    --gps-sb: 1;
+    position: relative;
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    background: var(--gps-panel);
+    color: var(--gps-text);
+    overflow: hidden;
+
+    button { font: inherit; color: inherit; }
+
+    // ------------------------------------------------------------------ list
+    .o_gps_panel {
+        flex: 0 0 340px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: var(--gps-panel);
+        border-inline-end: 1px solid var(--gps-border);
+        z-index: 3;
+    }
+    .o_gps_panel_head {
+        display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem;
+        background: var(--gps-head); border-bottom: 1px solid var(--gps-border);
+        .o_gps_title { font-weight: 600; font-size: 1.05rem; flex: 1; }
+        .o_gps_total { background: var(--gps-active); border-radius: 10rem; padding: 0 0.6rem; font-size: 0.8rem; font-weight: 600; }
+    }
+    .o_gps_live {
+        width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); animation: o_gps_pulse 2s infinite;
+        &.o_gps_live_err { background: #ef4444; animation: none; }
+    }
+    @keyframes o_gps_pulse { 70% { box-shadow: 0 0 0 0.5rem rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+    .o_gps_x {
+        border: 0; background: transparent; color: var(--gps-muted); border-radius: 50%; width: 2rem; height: 2rem;
+        display: inline-flex; align-items: center; justify-content: center;
+        &:hover { background: var(--gps-hover); }
+    }
+    .o_gps_search {
+        position: relative; padding: 0.6rem 0.75rem 0.3rem;
+        .oi { position: absolute; inset-inline-start: 1.35rem; top: 55%; transform: translateY(-50%); color: var(--gps-muted); }
+        input {
+            width: 100%; border: 0; border-radius: 0.5rem; background: var(--gps-input); color: var(--gps-text);
+            padding: 0.5rem 0.75rem; padding-inline-start: 2.2rem; outline: none;
+            &:focus { box-shadow: 0 0 0 2px var(--gps-active); }
+        }
+    }
+    .o_gps_chips {
+        display: flex; gap: 0.4rem; padding: 0.4rem 0.75rem 0.6rem; overflow-x: auto; scrollbar-width: none;
+        border-bottom: 1px solid var(--gps-border);
+    }
+    .o_gps_chip {
+        flex: none; border: 1px solid var(--gps-border); background: transparent; border-radius: 10rem;
+        padding: 0.15rem 0.7rem; font-size: 0.85rem; white-space: nowrap;
+        &.active { background: var(--gps-active); border-color: transparent; font-weight: 600; }
+        .o_gps_chip_n { color: var(--gps-muted); margin-inline-start: 0.2rem; }
+    }
+    .o_gps_error { margin: 0.5rem 0.75rem; padding: 0.4rem 0.6rem; border-radius: 0.4rem; background: rgba(239, 68, 68, 0.12); color: #dc2626; font-size: 0.85rem; }
+    .o_gps_rows { flex: 1; overflow-y: auto; min-height: 0; }
+    .o_gps_row {
+        width: 100%; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; text-align: start;
+        border: 0; border-bottom: 1px solid var(--gps-border); background: transparent;
+        &:hover { background: var(--gps-hover); }
+        &.active { background: var(--gps-active); }
+    }
+    .o_gps_dot { flex: none; width: 0.85rem; height: 0.85rem; border-radius: 50%; box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.18); }
+    .o_gps_row_main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .o_gps_row_name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .o_gps_row_sub, .o_gps_ago { color: var(--gps-muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .o_gps_row_side { flex: none; display: flex; flex-direction: column; align-items: flex-end; }
+    .o_gps_speed { font-weight: 700; small { font-weight: 400; color: var(--gps-muted); } }
+    .o_gps_empty {
+        display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 2.5rem 1.5rem; color: var(--gps-muted); text-align: center;
+        .oi { font-size: 2.5rem; opacity: 0.5; }
+    }
+
+    // ------------------------------------------------------------------ map stage
+    .o_gps_stage { position: relative; flex: 1; min-width: 0; }
+    .o_gps_canvas { position: absolute; inset: 0; }
+    .o_gps_nogl {
+        position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 0.5rem; padding: 2rem; text-align: center; background: var(--gps-head); color: var(--gps-muted);
+        .oi { font-size: 2.5rem; }
+    }
+    .o_gps_tools {
+        position: absolute; inset-block-start: 0.75rem; inset-inline-end: 0.75rem; z-index: 2;
+        display: flex; flex-direction: column; gap: 0.4rem;
+    }
+    .o_gps_tool {
+        width: 2.4rem; height: 2.4rem; border: 0; border-radius: 0.5rem; background: var(--gps-panel); color: var(--gps-text);
+        box-shadow: var(--gps-shadow); display: inline-flex; align-items: center; justify-content: center;
+        &:hover { background: var(--gps-hover); }
+        &.on { background: var(--gps-active); color: #2563eb; }
+    }
+    .o_gps_tool_wrap { position: relative; }
+    .o_gps_menu {
+        position: absolute; inset-inline-end: calc(100% + 0.4rem); top: 0; min-width: 9rem; padding: 0.25rem;
+        background: var(--gps-panel); border-radius: 0.5rem; box-shadow: var(--gps-shadow); display: flex; flex-direction: column;
+        button { display: flex; align-items: center; gap: 0.5rem; border: 0; background: transparent; padding: 0.45rem 0.7rem; border-radius: 0.35rem; text-align: start; white-space: nowrap;
+            &:hover { background: var(--gps-hover); } &.active { font-weight: 600; } }
+    }
+    .o_gps_legend {
+        position: absolute; inset-block-end: 1.6rem; inset-inline-start: 0.75rem; z-index: 2; gap: 0.9rem; align-items: center;
+        background: var(--gps-panel); padding: 0.35rem 0.8rem; border-radius: 10rem; box-shadow: var(--gps-shadow); font-size: 0.8rem;
+        span { display: inline-flex; align-items: center; gap: 0.35rem; }
+        i { width: 0.65rem; height: 0.65rem; border-radius: 50%; display: inline-block; }
+    }
+    .o_gps_fab {
+        position: absolute; inset-block-start: 0.75rem; inset-inline-start: 0.75rem; z-index: 2; border: 0; border-radius: 10rem;
+        background: var(--gps-panel); box-shadow: var(--gps-shadow); padding: 0.4rem 0.9rem; display: inline-flex; gap: 0.4rem; align-items: center; font-weight: 600;
+    }
+
+    // ------------------------------------------------------------------ selected vehicle card
+    .o_gps_card {
+        position: absolute; z-index: 3; inset-inline-start: 0.75rem; inset-block-end: 2.5rem; width: 22rem; max-width: calc(100% - 1.5rem);
+        background: var(--gps-panel); border-radius: 0.75rem; box-shadow: var(--gps-shadow); padding: 0.85rem 1rem;
+        display: flex; flex-direction: column; gap: 0.6rem;
+    }
+    .o_gps_card_head { display: flex; align-items: center; gap: 0.7rem; }
+    .o_gps_card_title { flex: 1; min-width: 0; display: flex; flex-direction: column; b { font-size: 1.05rem; } small { color: var(--gps-muted); } }
+    .o_gps_stats {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(4.2rem, 1fr)); gap: 0.4rem;
+        > div { display: flex; flex-direction: column; align-items: center; background: var(--gps-input); border-radius: 0.5rem; padding: 0.4rem 0.2rem; line-height: 1.25;
+            .oi { color: var(--gps-muted); font-size: 1.1rem; } b { font-size: 0.95rem; } small { color: var(--gps-muted); font-size: 0.7rem; } }
+    }
+    .o_gps_addr { display: flex; gap: 0.4rem; font-size: 0.88rem; .oi { color: var(--gps-muted); flex: none; } }
+    .o_gps_since { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem;
+        span { display: flex; align-items: center; gap: 0.4rem; .oi { color: var(--gps-muted); } }
+        .o_gps_silence { color: #d97706; .oi { color: #d97706; } } }
+    .o_gps_more { border: 0; background: transparent; color: #2563eb; padding: 0; text-align: start; font-size: 0.85rem; }
+    .o_gps_details { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.85rem; max-height: 14rem; overflow-y: auto;
+        > div { display: flex; align-items: center; gap: 0.5rem; > span { color: var(--gps-muted); min-width: 7rem; } > b, > a { flex: 1; min-width: 0; overflow-wrap: anywhere; font-weight: 600; }
+            button { border: 0; background: transparent; color: var(--gps-muted); padding: 0 0.2rem; } }
+        .o_gps_events { align-items: flex-start; ul { list-style: none; margin: 0; padding: 0; flex: 1; li { padding: 0.1rem 0; small { color: var(--gps-muted); margin-inline-start: 0.3rem; } } } } }
+    .o_gps_coords { color: var(--gps-muted); font-size: 0.78rem; direction: ltr; text-align: start; }
+    .o_gps_card_actions { display: flex; gap: 0.4rem; flex-wrap: wrap; .btn.active { box-shadow: inset 0 0 0 2px #2563eb; } }
+
+    // ------------------------------------------------------------------ vehicle markers
+    .o_gps_marker { cursor: pointer; }
+    .o_gps_veh {
+        position: relative; width: 0; height: 0;
+        --c: #27aef1;
+        .o_gps_badge {
+            position: absolute; width: 2.1rem; height: 2.1rem; margin: -1.05rem 0 0 -1.05rem; border-radius: 50%;
+            background: #fff; border: 3px solid var(--c); box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+            display: flex; align-items: center; justify-content: center; color: #1c2430; font-size: 1.15rem;
+            transform: scale(var(--gps-sb));
+        }
+        .o_gps_heading { position: absolute; inset: 0; transform-origin: 0 0;
+            i { position: absolute; left: -7px; top: calc(-1.05rem * var(--gps-sb) - 12px); border: 7px solid transparent; border-bottom: 11px solid var(--c); border-top: 0; }
+        }
+        &.top .o_gps_heading { transform-origin: 0 0; .o_gps_shape { transform: scale(var(--gps-s)); transform-origin: center; position: absolute; } }
+        &.moving .o_gps_badge, &.over .o_gps_badge { animation: none; }
+        &.offline .o_gps_badge { opacity: 0.75; }
+        .o_gps_ring { position: absolute; width: 3.6rem; height: 3.6rem; margin: -1.8rem 0 0 -1.8rem; border-radius: 50%; border: 3px solid var(--c); opacity: 0.55; animation: o_gps_ring 1.6s ease-out infinite; }
+        .o_gps_lbl {
+            position: absolute; top: calc(1.2rem * var(--gps-sb)); left: 0; transform: translateX(-50%); white-space: nowrap;
+            background: rgba(15, 23, 42, 0.82); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 0.05rem 0.45rem; border-radius: 0.3rem;
+        }
+        &.top .o_gps_lbl { top: calc(33px * var(--gps-s) + 4px); }
+        &.sel .o_gps_badge { box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 2px 10px rgba(0, 0, 0, 0.5); }
+    }
+    @keyframes o_gps_ring { from { transform: scale(0.6); opacity: 0.7; } to { transform: scale(1.3); opacity: 0; } }
+
+    // ------------------------------------------------------------------ phones: list = bottom sheet, card above it
+    @media (max-width: 767.98px) {
+        .o_gps_panel {
+            position: absolute; inset-inline: 0; inset-block-end: 0; height: 68%; flex: none; border-inline-end: 0;
+            border-top-left-radius: 1rem; border-top-right-radius: 1rem; box-shadow: 0 -4px 18px rgba(16, 24, 40, 0.25);
+            transform: translateY(105%); transition: transform 0.25s ease;
+        }
+        &.o_gps_list_open .o_gps_panel { transform: none; }
+        .o_gps_stage { flex: 1 1 100%; }
+        .o_gps_card { inset-inline: 0.5rem; inset-block-end: 0.5rem; width: auto; max-width: none; max-height: 62%; overflow-y: auto; }
+        &.o_gps_has_sel .o_gps_tools { inset-block-start: 0.75rem; }
+        .o_gps_chips { padding-inline: 0.75rem; }
+    }
+}

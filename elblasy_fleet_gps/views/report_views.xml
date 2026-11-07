@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================ daily summary -->
+    <record id="gps_daily_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.list</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" default_order="date desc, distance_km desc">
+                <field name="date"/>
+                <field name="device_id"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="driver_id" optional="show"/>
+                <field name="distance_km" sum="Total"/>
+                <field name="moving_hours" sum="Total"/>
+                <field name="idle_hours" sum="Total" optional="show"/>
+                <field name="stopped_hours" sum="Total" optional="hide"/>
+                <field name="trip_count" sum="Total"/>
+                <field name="max_speed" optional="show"/>
+                <field name="avg_speed" optional="show"/>
+                <field name="over_count" sum="Total" optional="show"/>
+                <field name="harsh_total" sum="Total" optional="show"/>
+                <field name="score" widget="progressbar" optional="show"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_daily_view_pivot" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.pivot</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="arch" type="xml">
+            <pivot string="Daily summary" sample="1">
+                <field name="device_id" type="row"/>
+                <field name="date" interval="week" type="col"/>
+                <field name="distance_km" type="measure"/>
+                <field name="trip_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gps_daily_view_graph" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.graph</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="arch" type="xml">
+            <graph string="Distance per day" type="bar" sample="1">
+                <field name="date" interval="day"/>
+                <field name="distance_km" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="gps_daily_view_search" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.search</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="device_id"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="last7" string="Last 7 days" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=6)).strftime('%Y-%m-%d'))]"/>
+                <filter name="last30" string="Last 30 days" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=29)).strftime('%Y-%m-%d'))]"/>
+                <filter name="date_filter" string="Date" date="date"/>
+                <separator/>
+                <filter name="active" string="Drove" domain="[('distance_km', '&gt;', 0)]"/>
+                <filter name="overspeed" string="With overspeed" domain="[('over_count', '&gt;', 0)]"/>
+                <filter name="harsh" string="With harsh events" domain="[('harsh_total', '&gt;', 0)]"/>
+                <group>
+                    <filter name="g_device" string="Device" context="{'group_by': 'device_id'}"/>
+                    <filter name="g_vehicle" string="Vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="g_driver" string="Driver" context="{'group_by': 'driver_id'}"/>
+                    <filter name="g_day" string="Day" context="{'group_by': 'date:day'}"/>
+                    <filter name="g_week" string="Week" context="{'group_by': 'date:week'}"/>
+                    <filter name="g_month" string="Month" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="gps_daily_action" model="ir.actions.act_window">
+        <field name="name">Daily Summary</field>
+        <field name="res_model">fleet.gps.daily</field>
+        <field name="view_mode">pivot,graph,list</field>
+        <field name="context">{'search_default_last7': 1}</field>
+    </record>
+
+    <!-- ================================================================ trips -->
+    <record id="gps_trip_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.trip.list</field>
+        <field name="model">fleet.gps.trip</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="device_id"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="driver_id" optional="show"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="duration_minutes" sum="Total"/>
+                <field name="distance_km" sum="Total"/>
+                <field name="avg_speed"/>
+                <field name="max_speed"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_trip_view_pivot" model="ir.ui.view">
+        <field name="name">fleet.gps.trip.pivot</field>
+        <field name="model">fleet.gps.trip</field>
+        <field name="arch" type="xml">
+            <pivot string="Trips" sample="1">
+                <field name="device_id" type="row"/>
+                <field name="date" interval="day" type="col"/>
+                <field name="distance_km" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gps_trip_view_search" model="ir.ui.view">
+        <field name="name">fleet.gps.trip.search</field>
+        <field name="model">fleet.gps.trip</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="device_id"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <filter name="last7" string="Last 7 days" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=6)).strftime('%Y-%m-%d'))]"/>
+                <filter name="date_filter" string="Date" date="date"/>
+                <group>
+                    <filter name="g_device" string="Device" context="{'group_by': 'device_id'}"/>
+                    <filter name="g_vehicle" string="Vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="g_day" string="Day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="gps_trip_action" model="ir.actions.act_window">
+        <field name="name">Trips</field>
+        <field name="res_model">fleet.gps.trip</field>
+        <field name="view_mode">list,pivot</field>
+        <field name="context">{'search_default_last7': 1}</field>
+    </record>
+
+    <record id="gps_trip_action_play" model="ir.actions.server">
+        <field name="name">Play trip</field>
+        <field name="model_id" ref="model_fleet_gps_trip"/>
+        <field name="binding_model_id" ref="model_fleet_gps_trip"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records[:1].action_playback()</field>
+    </record>
+
+    <!-- ================================================================ stops -->
+    <record id="gps_stop_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.stop.list</field>
+        <field name="model">fleet.gps.stop</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0">
+                <field name="device_id"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="duration_minutes" sum="Total"/>
+                <field name="place"/>
+                <field name="ignition" widget="boolean"/>
+                <field name="latitude" optional="hide"/>
+                <field name="longitude" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_stop_view_search" model="ir.ui.view">
+        <field name="name">fleet.gps.stop.search</field>
+        <field name="model">fleet.gps.stop</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="device_id"/>
+                <field name="vehicle_id"/>
+                <field name="place"/>
+                <filter name="last7" string="Last 7 days" domain="[('date', '&gt;=', (context_today() - datetime.timedelta(days=6)).strftime('%Y-%m-%d'))]"/>
+                <filter name="idling" string="Engine on" domain="[('ignition', '=', True)]"/>
+                <filter name="over10" string="Over 10 minutes" domain="[('duration_minutes', '&gt;=', 10)]"/>
+                <filter name="long" string="Over 1 hour" domain="[('duration_minutes', '&gt;=', 60)]"/>
+                <filter name="in_fence" string="Inside a geofence" domain="[('geofence_id', '!=', False)]"/>
+                <filter name="engine_off" string="Engine off" domain="[('ignition', '=', False)]"/>
+                <group>
+                    <filter name="g_place" string="Place" context="{'group_by': 'place'}"/>
+                    <filter name="g_device" string="Device" context="{'group_by': 'device_id'}"/>
+                    <filter name="g_vehicle" string="Vehicle" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="g_day" string="Day" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="gps_stop_action" model="ir.actions.act_window">
+        <field name="name">Stops</field>
+        <field name="res_model">fleet.gps.stop</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'search_default_last7': 1}</field>
+    </record>
+
+
+    <!-- ================================================================ driving behaviour -->
+    <record id="gps_daily_view_list_behavior" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.list.behavior</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" default_order="score asc"
+                  decoration-danger="score &lt; 60 and moving_hours &gt; 0" decoration-warning="score &gt;= 60 and score &lt; 80 and moving_hours &gt; 0">
+                <field name="date"/>
+                <field name="device_id"/>
+                <field name="vehicle_id" optional="show"/>
+                <field name="driver_id" optional="show"/>
+                <field name="distance_km" sum="Total"/>
+                <field name="max_speed"/>
+                <field name="over_count" sum="Total"/>
+                <field name="over_hours" sum="Total"/>
+                <field name="harsh_brake" sum="Total"/>
+                <field name="harsh_accel" sum="Total"/>
+                <field name="score" widget="progressbar"/>
+                <field name="moving_hours" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_daily_view_pivot_behavior" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.pivot.behavior</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Driving behaviour" sample="1">
+                <field name="device_id" type="row"/>
+                <field name="over_count" type="measure"/>
+                <field name="over_hours" type="measure"/>
+                <field name="harsh_brake" type="measure"/>
+                <field name="harsh_accel" type="measure"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gps_behavior_action" model="ir.actions.act_window">
+        <field name="name">Driving Behaviour</field>
+        <field name="res_model">fleet.gps.daily</field>
+        <field name="view_mode">pivot,list,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('gps_daily_view_pivot_behavior')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('gps_daily_view_list_behavior')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('gps_daily_view_graph')})]"/>
+        <field name="context">{'search_default_last7': 1, 'search_default_active': 1}</field>
+    </record>
+
+    <!-- ================================================================ waiting (stops by place) -->
+    <record id="gps_stop_view_pivot" model="ir.ui.view">
+        <field name="name">fleet.gps.stop.pivot</field>
+        <field name="model">fleet.gps.stop</field>
+        <field name="arch" type="xml">
+            <pivot string="Waiting" sample="1">
+                <field name="place" type="row"/>
+                <field name="duration_minutes" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gps_waiting_action" model="ir.actions.act_window">
+        <field name="name">Waiting by Place</field>
+        <field name="res_model">fleet.gps.stop</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="context">{'search_default_last7': 1, 'search_default_over10': 1}</field>
+    </record>
+
+    <!-- ================================================================ comparison -->
+    <record id="gps_daily_view_pivot_compare" model="ir.ui.view">
+        <field name="name">fleet.gps.daily.pivot.compare</field>
+        <field name="model">fleet.gps.daily</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <pivot string="Compare" sample="1">
+                <field name="device_id" type="row"/>
+                <field name="distance_km" type="measure"/>
+                <field name="moving_hours" type="measure"/>
+                <field name="idle_hours" type="measure"/>
+                <field name="trip_count" type="measure"/>
+                <field name="over_count" type="measure"/>
+                <field name="score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gps_compare_action" model="ir.actions.act_window">
+        <field name="name">Compare Vehicles</field>
+        <field name="res_model">fleet.gps.daily</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('gps_daily_view_pivot_compare')}),
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('gps_daily_view_graph')})]"/>
+        <field name="context">{'search_default_last7': 1, 'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Compare vehicles side by side, or a period with the previous one</p>
+            <p>Use the Date filter and pick a comparison (previous period / previous year) in the search bar; the
+               pivot then shows both periods next to each other for every vehicle.</p>
+        </field>
+    </record>
+
+    <!-- ================================================================ history import -->
+    <record id="gps_backfill_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.backfill.list</field>
+        <field name="model">fleet.gps.backfill</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="state" widget="badge" decoration-info="state == 'running'" decoration-success="state == 'done'" decoration-danger="state == 'failed'"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="positions"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_backfill_view_form" model="ir.ui.view">
+        <field name="name">fleet.gps.backfill.form</field>
+        <field name="model">fleet.gps.backfill</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_start" type="object" string="Start" class="btn-primary" invisible="state in ('running',)"/>
+                    <button name="action_run_now" type="object" string="Run a batch now" invisible="state != 'running'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="server_id" readonly="state == 'running'"/>
+                            <field name="date_from" readonly="state == 'running'"/>
+                            <field name="date_to" readonly="state == 'running'"/>
+                            <field name="device_ids" widget="many2many_tags" readonly="state == 'running'"/>
+                        </group>
+                        <group>
+                            <field name="progress" widget="progressbar"/>
+                            <field name="cursor"/>
+                            <field name="total"/>
+                            <field name="positions"/>
+                        </group>
+                    </group>
+                    <field name="error" invisible="not error"/>
+                    <div class="alert alert-info" role="alert">
+                        Fetches the stored route of each device and day from Traccar, then computes trips, stops and
+                        daily totals. Runs in the background, a few device-days per minute. Raw positions older than the
+                        retention period are purged at night, the daily summaries are kept.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="gps_backfill_action" model="ir.actions.act_window">
+        <field name="name">History Import</field>
+        <field name="res_model">fleet.gps.backfill</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_gps_reports" name="Reports" parent="menu_gps_root" sequence="30"/>
+    <menuitem id="menu_gps_daily" name="Daily Summary" parent="menu_gps_reports" action="gps_daily_action" sequence="10"/>
+    <menuitem id="menu_gps_trips" name="Trips" parent="menu_gps_reports" action="gps_trip_action" sequence="20"/>
+    <menuitem id="menu_gps_waiting" name="Waiting by Place" parent="menu_gps_reports" action="gps_waiting_action" sequence="40"/>
+    <menuitem id="menu_gps_behavior" name="Driving Behaviour" parent="menu_gps_reports" action="gps_behavior_action" sequence="50"/>
+    <menuitem id="menu_gps_compare" name="Compare" parent="menu_gps_reports" action="gps_compare_action" sequence="60"/>
+    <menuitem id="menu_gps_stops" name="Stops" parent="menu_gps_reports" action="gps_stop_action" sequence="30"/>
+    <menuitem id="menu_gps_backfill" name="History Import" parent="menu_gps_config" action="gps_backfill_action" sequence="20" groups="group_gps_manager"/>
+</odoo>

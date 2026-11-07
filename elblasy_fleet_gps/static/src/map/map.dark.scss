@@ -1,0 +1,16 @@
+// Dark theme of the live map (loaded only in Odoo's dark mode bundle).
+.o_gps_map {
+    --gps-panel: #1f2530;
+    --gps-head: #262d3a;
+    --gps-border: #323a49;
+    --gps-hover: #2a3140;
+    --gps-active: #2f3d57;
+    --gps-text: #e6e9ef;
+    --gps-muted: #98a2b3;
+    --gps-input: #2a3140;
+    --gps-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+
+    .o_gps_tool.on { color: #7aa7ff; }
+    .o_gps_card_actions .btn.active { box-shadow: inset 0 0 0 2px #7aa7ff; }
+    .o_gps_error { color: #fca5a5; }
+}

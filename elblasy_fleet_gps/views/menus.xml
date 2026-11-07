@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_gps_root" name="Fleet GPS" sequence="61" groups="group_gps_user"
+              web_icon="elblasy_fleet_gps,static/description/icon.png"/>
+    <record id="gps_map_action" model="ir.actions.client">
+        <field name="name">Live Map</field>
+        <field name="tag">elblasy_fleet_gps_map</field>
+    </record>
+    <record id="gps_dashboard_action" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">elblasy_fleet_gps_dashboard</field>
+    </record>
+    <record id="gps_playback_action" model="ir.actions.client">
+        <field name="name">Playback</field>
+        <field name="tag">elblasy_fleet_gps_playback</field>
+    </record>
+    <menuitem id="menu_gps_playback" name="Playback" parent="menu_gps_root" action="gps_playback_action" sequence="8"/>
+    <menuitem id="menu_gps_dashboard" name="Dashboard" parent="menu_gps_root" action="gps_dashboard_action" sequence="3"/>
+    <menuitem id="menu_gps_map" name="Live Map" parent="menu_gps_root" action="gps_map_action" sequence="5"/>
+    <menuitem id="menu_gps_devices" name="Devices" parent="menu_gps_root" action="gps_device_action" sequence="10"/>
+    <record id="gps_geofence_view_list" model="ir.ui.view">
+        <field name="name">fleet.gps.geofence.list</field>
+        <field name="model">fleet.gps.geofence</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="description"/>
+                <field name="server_id"/>
+            </list>
+        </field>
+    </record>
+    <record id="gps_geofence_action" model="ir.actions.act_window">
+        <field name="name">Geofences</field>
+        <field name="res_model">fleet.gps.geofence</field>
+        <field name="view_mode">list</field>
+    </record>
+    <menuitem id="menu_gps_config" name="Configuration" parent="menu_gps_root" sequence="90" groups="group_gps_manager"/>
+    <menuitem id="menu_gps_servers" name="Servers" parent="menu_gps_config" action="gps_server_action" sequence="10"/>
+    <menuitem id="menu_gps_geofences" name="Geofences" parent="menu_gps_root" action="gps_geofence_action" sequence="20"/>
+</odoo>

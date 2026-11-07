@@ -1,0 +1,52 @@
+// Playback of one route. Reuses the live map's panel, marker and legend styles (.o_gps_map); only the layout differs.
+.o_gps_map.o_gps_pb {
+    --gps-grid: rgba(107, 118, 134, 0.18);
+    --gps-series: #2a78d6;
+    flex-direction: column;
+
+    .o_gps_pb_bar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: var(--gps-head); border-bottom: 1px solid var(--gps-border); z-index: 4;
+        .o_gps_pb_title { font-size: 1.1rem; font-weight: 600; margin: 0 0.5rem 0 0; }
+    }
+    .o_gps_select { background: var(--gps-panel); color: inherit; border: 1px solid var(--gps-border); border-radius: 0.5rem; padding: 0.3rem 0.6rem; max-width: 14rem; }
+    .o_gps_icon_btn { border: 1px solid var(--gps-border); background: var(--gps-panel); color: inherit; border-radius: 0.5rem; width: 2.1rem; height: 2.1rem; display: inline-flex; align-items: center; justify-content: center; &:hover { background: var(--gps-hover); } }
+    .o_gps_pb_day { display: inline-flex; align-items: center; gap: 0.25rem; }
+    .o_gps_badge_note { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 10rem; background: var(--gps-active); color: var(--gps-muted); }
+
+    .o_gps_pb_msg { position: absolute; inset-inline: 0; top: 30%; margin-inline: auto; width: fit-content; max-width: 90%; z-index: 3; display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 1rem; border-radius: 0.6rem; background: var(--gps-panel); box-shadow: var(--gps-shadow); color: var(--gps-muted); }
+    .o_gps_pb_err { color: #dc2626; }
+    .o_gps_pb_legend { inset-block-start: 0.75rem; inset-block-end: auto; small { color: var(--gps-muted); } }
+
+    // a slim, translucent panel in the corner: the vehicle stays in the middle of the map, uncovered
+    .o_gps_pb_panel {
+        position: absolute; z-index: 3; inset-inline-start: 0.6rem; inset-block-end: 1.9rem; width: unquote("min(30rem, calc(100% - 1.2rem))");
+        background: color-mix(in srgb, var(--gps-panel) 92%, transparent); backdrop-filter: blur(4px);
+        border-radius: 0.6rem; box-shadow: var(--gps-shadow); padding: 0.35rem 0.55rem; display: flex; flex-direction: column; gap: 0.3rem;
+        &.o_gps_mini { width: unquote("min(17rem, calc(100% - 1.2rem))"); }
+    }
+    .o_gps_pb_ctrl { display: flex; align-items: center; gap: 0.45rem; }
+    .o_gps_pb_play { width: 2rem; height: 2rem; border: 0; border-radius: 50%; background: var(--gps-series); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex: none; .oi { font-size: 1.2rem; } }
+    .o_gps_pb_slider { flex: 1; min-width: 0; height: 1rem; accent-color: var(--gps-series); }
+    .o_gps_pb_time { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.85rem; min-width: 3.9rem; text-align: end; }
+    .o_gps_pb_row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+    .o_gps_pb_row .o_gps_icon_btn { width: 1.8rem; height: 1.8rem; &.on { background: var(--gps-active); } }
+    .o_gps_pb_fold { width: 1.7rem; height: 1.7rem; flex: none; }
+    .o_gps_pb_speed { padding: 0.1rem 0.3rem; font-size: 0.8rem; max-width: 4.6rem; }
+    .o_gps_pb_stat { font-size: 0.8rem; white-space: nowrap; small { color: var(--gps-muted); } }
+    .o_gps_pb_spacer { flex: 1; }
+    .o_gps_pb_chart { flex: 0 0 7rem; position: relative; padding: 0.4rem 0.75rem 0.5rem; border-top: 1px solid var(--gps-border); background: var(--gps-panel); }
+
+    .o_gps_stopmark {
+        min-width: 1.7rem; height: 1.7rem; padding: 0 0.3rem; border-radius: 0.85rem; background: var(--gps-stop, #27aef1); border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45); color: #fff; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; justify-content: center; white-space: nowrap;
+        &.idle { background: #f59e0b; }
+    }
+    @media (max-width: 575.98px) {
+        .o_gps_pb_bar { gap: 0.35rem; padding: 0.4rem 0.5rem; .o_gps_pb_title { display: none; }
+            > .o_gps_select { flex: 1 1 7rem; max-width: none; min-width: 0; }
+            .o_gps_pb_day { flex: 1 1 11rem; .o_gps_select { flex: 1; min-width: 0; } } }
+    }
+    @media (max-width: 767.98px) {
+        .o_gps_pb_chart { flex-basis: 5.5rem; }
+        .o_gps_pb_panel { inset-block-end: 1.5rem; }
+    }
+}
